@@ -7,7 +7,6 @@ codeunit 50189 "PTE Merge Field"
         CaseRec: Record "PVS Case";
     begin
         if Bookmark = 'SAMPLE' then begin //Bookmark from the mergefield setup
-            ContentTxt := '';
             CaseRec.Get(Global_DocRec.ID1);
             outResultTxt := CaseRec."Quote No.";
         end;
