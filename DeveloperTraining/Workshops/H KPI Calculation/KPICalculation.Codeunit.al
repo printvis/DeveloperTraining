@@ -21,21 +21,22 @@ codeunit 50600 "PTE KPI Calculation"
         in_Rec."Misc. 3" := KPI_Value3;
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"PVS Job", 'OnAfterValidate_Price_Method', '', true, false)]
-    local procedure OnAfterValidate_Price_Method2(var in_Rec: Record "PVS Job")
+    [EventSubscriber(ObjectType::Table, Database::"PVS Job", 'OnAfterValidate_Price_Method', '', false, false)]
+    procedure OnAfterValidate_Price_Method3(var in_Rec: Record "PVS Job");
     var
-        KPI_Value4: Decimal;
-        CacheManagement: Codeunit "PVS Cache Management";
         TempJobCalculationDetail: Record "PVS Job Calculation Detail" temporary;
+        Item: Record Item temporary;
+        CacheManagement: Codeunit "PVS Cache Management";
+        ItemManagement: Codeunit "PVS Item Management";
     begin
         CacheManagement.READ_Tmp_Job_CalcUnitDetails(TempJobCalculationDetail, in_Rec.ID, in_Rec.Job, in_Rec.Version);
-        TempJobCalculationDetail.SetRange("Item Type", TempJobCalculationDetail."Item Type"::Plates);
-        if TempJobCalculationDetail.FindSet() then
-            repeat
-                KPI_Value4 += TempJobCalculationDetail.Price;
-            until TempJobCalculationDetail.Next() = 0;
-        // Assign the KPI values to the Job
-        in_Rec."Misc. 4" := KPI_Value4;
+        TempJobCalculationDetail.SetRange("Item Type", TempJobCalculationDetail."Item Type"::Paper);
+        if TempJobCalculationDetail.FindFirst() then
+            if Item.Get(TempJobCalculationDetail."Item No.") then begin
+                in_Rec."Misc. 4" := Item."PVS Price" * 1000;
+                in_Rec."Misc. 5" := ItemManagement.Item_InventoryUnit_Factor(Item, Item."PVS Inventory Unit"::"Pcs.", Item."PVS Inventory Unit"::Weight);
+                in_Rec."Misc. 6" := ItemManagement.Item_InventoryUnit_Factor(Item, Item."PVS Inventory Unit"::"Pcs.", Item."PVS Inventory Unit"::"Area");
+            end;
         in_Rec.Modify();
     end;
 }
