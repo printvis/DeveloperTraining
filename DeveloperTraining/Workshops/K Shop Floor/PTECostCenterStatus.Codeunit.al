@@ -1,7 +1,10 @@
 codeunit 50191 PTECostCenterStatus
 {
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"PVS Shop Floor Management", 'OnBeforeJournal_Special_Start_Stop', '', false, false)]
-    local procedure OnBeforeJournal_Special_Start_Stop(var ShopFloorJournalEntry: Record "PVS Shop Floor Journal Entry"; UnitOfMeasure: Record "PVS Unit of Measure"; Is_Start: Boolean; var Handled: Boolean);
+    local procedure OnBeforeJournal_Special_Start_Stop(var ShopFloorJournalEntry: Record "PVS Shop Floor Journal Entry"; UnitOfMeasure: Record "PVS Unit of Measure"; Is_Start: Boolean; var Handled: Boolean)
+    var
+
+        RequestText: Text;
     begin
         ShopFloorJournalEntry.CalcFields("Order No.");
         if Is_Start then
@@ -13,15 +16,15 @@ codeunit 50191 PTECostCenterStatus
 
     local procedure sendToSomewhere(TextToSend: Text)
     var
-        H: HttpClient;
-        r: HttpResponseMessage;
+        WebHookHttpClient: HttpClient;
+        WebHookResponseMessage: HttpResponseMessage;
+        Content: HttpContent;
     begin
-        h.Get('https://webhook.site/9113df2f-c59d-4823-9408-610cf80774e6?string=' + TextToSend, r);
-        //simple HTTP Get
-        //but could be anything.
+        //TODO convert to json
+        Content.WriteFrom(TextToSend);
+
+        WebHookHttpClient.Post('https://webhook.site/10c9463e-2fc4-4171-bfe6-59a1614a1261', Content, WebHookResponseMessage);
+        //WebHookHttpClient.Get('https://webhook.site/10c9463e-2fc4-4171-bfe6-59a1614a1261?string=' + TextToSend, WebHookResponseMessage);
+
     end;
-
-
-    // https://webhook.site/#!/9113df2f-c59d-4823-9408-610cf80774e6/55a2d4bb-70ec-4837-99cf-bc94c4019dac/1
-
 }
